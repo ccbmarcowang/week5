@@ -5,16 +5,18 @@ import async_timeout
 from scrapy.http import HtmlResponse
 results=[]
 
-def fetch(url):
+async def fetch(session,url):
     with async_timeout.timeout(10):
         async with session.get(url) as response:
             return await response.text()
 
 def parse(url,body):
     response=HtmlResponse(url=url,body=body,encoding='utf-8')
-    for comment in response.css('div.comment-list-item'):
-        name=comment.xpath('.//a[@class="username"]/text()').extract_first().strip()
-        updat_time=comment.xpath('.//relative-time/@dateime').extract_first()
+    print(response)
+    for comment in response.css('li.col-12'):
+        name=comment.xpath('.//h3/a/text()').extract_first().strip()
+        update_time=comment.xpath('.//relative-time/@datetime').extract_first()
+        update_time=' '.join(update_time[:-1].split('T'))
         results.append((name,update_time))
     return results
 
